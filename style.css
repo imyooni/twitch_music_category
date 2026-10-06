@@ -136,20 +136,25 @@ html::-webkit-scrollbar-thumb:hover {
 .filter-button,
 .page-button {
     border: 0;
-    background: #26262c;
-    color: #bf94ff;
+    background: #492a76;
+    color: white;
     cursor: pointer;
     border-radius: 4px;
     transition:
         background 0.15s ease,
         color 0.15s ease,
         transform 0.1s ease;
+    text-shadow:
+        1px 1px 0px black,
+        -1px -1px 0px black,
+        1px -1px 0px black,
+        -1px 1px 0px black;
 }
 
-
+.login-button,
 .filter-button:hover,
 .page-button:hover:not(:disabled) {
-    background: #323238;
+    background: #9147ff;
 }
 
 .login-button:active,
@@ -158,21 +163,10 @@ html::-webkit-scrollbar-thumb:hover {
     transform: scale(0.97);
 }
 
-.login-button:hover {
-   background: #9147ff; 
-}
-
 .login-button {
     padding: 9px 14px;
     font-size: 14px;
-    background: #492a76;
-    text-shadow:
-        1px 1px 0px black,
-        -1px -1px 0px black,
-        1px -1px 0px black,
-        -1px 1px 0px black;
 }
-
 
 
 .profile-menu-container {
@@ -604,7 +598,7 @@ h2 {
     box-sizing: border-box;
     border: 1px solid black;
     border-radius: 6px;
-    background: #9147ff;
+    background: #772ce8;
     color: white;
     font-family: "TwitchFont", sans-serif;
     font-size: 13px;
@@ -622,7 +616,7 @@ h2 {
 }
 
 .watch-button:hover {
-    background: #772ce8;
+    background: #9147ff;
 }
 
 .watch-button:active {
