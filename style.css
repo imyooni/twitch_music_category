@@ -151,7 +151,7 @@ html::-webkit-scrollbar-thumb:hover {
         -1px 1px 0px black;
 }
 
-.login-button,
+.login-button:hover,
 .filter-button:hover,
 .page-button:hover:not(:disabled) {
     background: #9147ff;
@@ -167,7 +167,6 @@ html::-webkit-scrollbar-thumb:hover {
     padding: 9px 14px;
     font-size: 14px;
 }
-
 
 .profile-menu-container {
     position: fixed;
@@ -616,7 +615,7 @@ h2 {
 }
 
 .watch-button:hover {
-    background: #9147ff;
+    background: #FFD700;
 }
 
 .watch-button:active {
