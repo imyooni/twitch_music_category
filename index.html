@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Twitch Music</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="app">
+
+        <!-- Header -->
+        <header class="header">
+
+            <div class="music-info">
+                <img src="https://static-cdn.jtvnw.net/ttv-boxart/26936-144x192.jpg" class="music-art">
+
+                <div>
+                    <div class="version" id="version">버전: 1.0</div>
+                    <div class="author">
+                        <a href="https://www.twitch.tv/imyooni" target="_blank" rel="noopener noreferrer">
+                            Imyooni
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="header-right">
+                <button id="loginButton" class="login-button">
+                    로그인
+                </button>
+
+                <div class="profile-menu-container">
+                    <button id="profileButton" class="profile-button">
+                        <img id="profilePic" class="hidden" src="" alt="Profile">
+                    </button>
+
+                    <div id="profileDropdown" class="profile-dropdown hidden">
+                        <button id="logoutButton" class="logout-button">
+                            로그아웃
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+        </header>
+
+        <!-- Pagination -->
+        <div id="pagination" class="pagination hidden">
+
+            <button id="previousPage" class="page-button">
+                ‹
+            </button>
+
+            <div id="pageNumber">
+                1/1
+            </div>
+
+            <button id="nextPage" class="page-button">
+                ›
+            </button>
+
+        </div>
+
+        <!-- Filters -->
+        <div class="filters">
+
+            <button id="pianoButton" class="filter-button">
+                피아노
+            </button>
+
+            <button id="koreanButton" class="filter-button">
+                한국어
+            </button>
+
+        </div>
+
+        <!-- Content -->
+        <main id="content">
+
+            <div id="loadingLabel" class="loading-label">
+                <img src="./loading.gif" alt="">
+                <div>로딩 중...</div>
+            </div>
+
+            <div id="streamContent" class="hidden">
+
+                <section>
+                    <h2>팔로잉</h2>
+                    <div id="followingList"></div>
+                </section>
+
+                <section>
+                    <h2>탐색</h2>
+                    <div id="discoverList"></div>
+                </section>
+
+            </div>
+
+        </main>
+
+    </div>
+
+    <script src="app.js"></script>
+
+</body>
+
+</html>
