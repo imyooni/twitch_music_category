@@ -357,13 +357,13 @@ html::-webkit-scrollbar-thumb:hover {
 #pianoButton {
     border: 1px solid black;
     background: #5a3a2a;
-    transition: border 0.15s ease,
+    transition: border 0.15s ease;
 }
 
 #koreanButton {
     border: 1px solid black;
     background: #5a2a3a;
-    transition: background 0.15s ease,
+    transition: background 0.15s ease;
 }
 
 #pianoButton:hover {
