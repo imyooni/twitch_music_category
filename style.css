@@ -146,7 +146,7 @@ html::-webkit-scrollbar-thumb:hover {
         transform 0.1s ease;
 }
 
-.login-button:hover,
+
 .filter-button:hover,
 .page-button:hover:not(:disabled) {
     background: #323238;
@@ -158,10 +158,22 @@ html::-webkit-scrollbar-thumb:hover {
     transform: scale(0.97);
 }
 
+.login-button:hover {
+   background: #9147ff; 
+}
+
 .login-button {
     padding: 9px 14px;
     font-size: 14px;
+    background: #492a76;
+    text-shadow:
+        1px 1px 0px black,
+        -1px -1px 0px black,
+        1px -1px 0px black,
+        -1px 1px 0px black;
 }
+
+
 
 .profile-menu-container {
     position: fixed;
