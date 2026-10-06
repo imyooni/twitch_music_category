@@ -401,6 +401,22 @@ function sortTags(tags) {
     });
 }
 
+function formatNumber(num) {
+    if (num >= 100000000) {
+        return (num / 100000000).toFixed(1).replace(/\.0$/, "") + "억";
+    }
+
+    if (num >= 10000) {
+        return (num / 10000).toFixed(1).replace(/\.0$/, "") + "만";
+    }
+
+    if (num >= 1000) {
+        return (num / 1000).toFixed(1).replace(/\.0$/, "") + "천";
+    }
+
+    return num.toLocaleString();
+}
+
 function renderStream(stream) {
     const username = stream.user_name || stream.user_login || "Unknown";
     const login = stream.user_login || "";
@@ -508,7 +524,7 @@ function renderStream(stream) {
                     <span class="live-indicator"></span>
 
                     <span>
-                        ${viewerCount.toLocaleString()} Viewers
+                        ${formatNumber(viewerCount)} 명
                     </span>
 
                 </div>
