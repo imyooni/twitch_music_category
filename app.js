@@ -35,6 +35,7 @@ const pageNumber = document.getElementById("pageNumber");
 const pianoButton = document.getElementById("pianoButton");
 const koreanButton = document.getElementById("koreanButton");
 const loginButton = document.getElementById("loginButton");
+const authContainer = document.getElementById("authContainer");
 const profilePic = document.getElementById("profilePic");
 
 const profileButton = document.getElementById("profileButton");
@@ -43,6 +44,8 @@ const logoutButton = document.getElementById("logoutButton");
 
 const loadingLabel = document.getElementById("loadingLabel");
 const streamContent = document.getElementById("streamContent");
+
+
 
 // ============================================================
 // HELPERS
@@ -912,13 +915,20 @@ function setLoading(loading) {
 }
 
 async function initializeApp() {
-    const freshLogin = await handleTwitchAuth();
-    if (!freshLogin) {
-        await restoreTwitchLogin();
-    }
-    await loadStreams();
-}
+    try {
+        const freshLogin = await handleTwitchAuth();
 
+        if (!freshLogin) {
+            await restoreTwitchLogin();
+        }
+
+        await loadStreams();
+    } finally {
+        if (authContainer) {
+            authContainer.classList.remove("auth-loading");
+        }
+    }
+}
 
 initializeApp();
 
