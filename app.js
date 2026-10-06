@@ -860,41 +860,33 @@ async function refreshTwitchToken() {
         const data = await response.json();
 
         if (!response.ok) {
-            console.error("❌ Twitch refresh failed:",
-                response.status,
-                data
-            );
-
-            clearTwitchSession();
+            console.error("❌ Twitch refresh failed:", response.status, data);
             return null;
         }
 
         if (!data.access_token) {
-            console.error(
-                "❌ No access token returned"
-            );
-
-            clearTwitchSession();
+            console.error( "❌ No access token returned" );
             return null;
         }
 
         localStorage.setItem("twitch_access_token",data.access_token);
 
         if (data.refresh_token) {
-            localStorage.setItem("twitch_refresh_token",data.refresh_token);
+            localStorage.setItem(
+                "twitch_refresh_token",
+                data.refresh_token
+            );
         }
-
         return data.access_token;
-
     } catch (error) {
         console.error(
             "❌ Twitch refresh request failed:",
             error
         );
-
         return null;
     }
 }
+
 
 if (loginButton) {
     loginButton.addEventListener("click", loginWithTwitch);
