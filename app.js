@@ -9,11 +9,12 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
-const API_URL = "https://zuljababot.onrender.com/twitch_music/streams";
+const default_api_url = "https://zuljanim.onrender.com";
+const API_URL = `${default_api_url}/twitch_music/streams`;
 const TWITCH_CLIENT_ID = "3cyc5tkc6lih3tx28l66dsnqjmqz0w";
-const TWITCH_REDIRECT_URI = "https://zuljababot.onrender.com/twitch_music/callback";
+const TWITCH_REDIRECT_URI = `${default_api_url}/twitch_music/callback`;
 const PAGE_SIZE = 20;
-const REFRESH_INTERVAL_MS = 120000;
+const REFRESH_INTERVAL_MS = 60000*5;
 let allStreams = [];
 let followedUserIds = new Set();
 let currentPage = 0;
@@ -861,7 +862,7 @@ async function refreshTwitchToken() {
 
     try {
         const response = await fetch(
-            "https://zuljababot.onrender.com/twitch_music/refresh",
+            `${default_api_url}/twitch_music/refresh`,
             {
                 method: "POST",
                 headers: {
