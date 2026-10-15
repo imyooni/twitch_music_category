@@ -99,7 +99,7 @@ async function loadStreams() {
     try {
         setLoading(true);
 
-        const response = await fetch(`https://zuljababot.onrender.com/twitch_music/streams?_=${Date.now()}`, {
+        const response = await fetch(`${defaul_api_url}/twitch_music/streams?_=${Date.now()}`, {
             cache: "no-store"
         });
 
