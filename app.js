@@ -14,7 +14,6 @@ const API_URL = `${default_api_url}/twitch_music/streams`;
 const TWITCH_CLIENT_ID = "3cyc5tkc6lih3tx28l66dsnqjmqz0w";
 const TWITCH_REDIRECT_URI = `${default_api_url}/twitch_music/callback`;
 const PAGE_SIZE = 20;
-const REFRESH_INTERVAL_MS = 60000*5;
 let allStreams = [];
 let followedUserIds = new Set();
 let currentPage = 0;
@@ -980,8 +979,4 @@ document.addEventListener("click", (event) => {
     }
 });
 
-// ============================================================
-// AUTOMATIC REFRESH
-// ============================================================
 
-setInterval(loadStreams, REFRESH_INTERVAL_MS);
