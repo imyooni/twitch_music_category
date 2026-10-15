@@ -46,6 +46,7 @@ const logoutButton = document.getElementById("logoutButton");
 
 const loadingLabel = document.getElementById("loadingLabel");
 const streamContent = document.getElementById("streamContent");
+const loginRequired = document.getElementById("loginRequired");
 
 // ============================================================
 // HELPERS
@@ -99,39 +100,89 @@ async function loadStreams() {
     try {
         setLoading(true);
 
-        const response = await fetch(`${defaul_api_url}/twitch_music/streams?_=${Date.now()}`, {
-            cache: "no-store"
-        });
+        const streams = [];
+        let cursor = null;
 
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
-        }
+        do {
+            const url = new URL(`${API_URL}/streams`);
+            url.searchParams.set("first", "100");
+            url.searchParams.set("game_id", "26936");
 
-        const result = await response.json();
+            if (cursor) url.searchParams.set("after", cursor);
 
-        if (!Array.isArray(result.data)) {
-            console.error("❌ API data is not an array:", result.data);
-            throw new Error("Invalid API response: expected data array");
-        }
+            const response = await fetch(url, {
+                headers: {
+                    "Client-ID": TWITCH_CLIENT_ID,
+                    ...(twitchAccessToken
+                        ? { Authorization: `Bearer ${twitchAccessToken}` }
+                        : {})
+                }
+            });
 
-        // Remove duplicate channels by Twitch user ID.
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+
+            const result = await response.json();
+            streams.push(...(result.data || []));
+            cursor = result.pagination?.cursor || null;
+        } while (cursor && streams.length < 500);
+
         const uniqueStreams = new Map();
 
-        for (const stream of result.data) {
-            const userId = String(stream.user_id || "");
-
-            if (!userId || uniqueStreams.has(userId)) {
+        for (const stream of streams) {
+            if (!stream.user_id || uniqueStreams.has(stream.user_id)) {
                 continue;
             }
 
-            uniqueStreams.set(userId, stream);
+            uniqueStreams.set(stream.user_id, {
+                ...stream,
+                profileImageUrl: "",
+                description: "",
+                broadcasterType: "",
+                tags: stream.tags || []
+            });
         }
 
         allStreams = Array.from(uniqueStreams.values());
 
+        // Load profile images, descriptions, and broadcaster types.
+        const headers = {
+            "Client-ID": TWITCH_CLIENT_ID,
+            ...(twitchAccessToken
+                ? { Authorization: `Bearer ${twitchAccessToken}` }
+                : {})
+        };
+
+        for (let i = 0; i < allStreams.length; i += 100) {
+            const batch = allStreams.slice(i, i + 100);
+            const url = new URL(`${API_URL}/users`);
+
+            batch.forEach(stream => {
+                url.searchParams.append("id", stream.user_id);
+            });
+
+            const response = await fetch(url, { headers });
+
+            if (!response.ok) continue;
+
+            const result = await response.json();
+            const users = new Map(
+                (result.data || []).map(user => [user.id, user])
+            );
+
+            batch.forEach(stream => {
+                const user = users.get(stream.user_id);
+                if (!user) return;
+
+                stream.profileImageUrl = user.profile_image_url || "";
+                stream.description = user.description || "";
+                stream.broadcasterType = user.broadcaster_type || "";
+            });
+        }
+
         currentPage = 0;
         render();
-
     } catch (error) {
         console.error("❌ Failed to load Music streams:", error);
 
@@ -147,9 +198,7 @@ async function loadStreams() {
             }
         }
 
-        if (pagination) {
-            pagination.classList.add("hidden");
-        }
+        if (pagination) pagination.classList.add("hidden");
     } finally {
         setLoading(false);
     }
@@ -672,6 +721,21 @@ function clearTwitchSession() {
     }
 
     if (loginButton) loginButton.classList.remove("hidden");
+    if (loginRequired) {
+        loginRequired.classList.remove("hidden");
+    }
+
+    if (streamContent) {
+        streamContent.classList.add("hidden");
+    }
+
+    if (loadingLabel) {
+        loadingLabel.classList.add("hidden");
+    }
+
+    if (pagination) {
+        pagination.classList.add("hidden");
+    }
 
     render();
 }
@@ -686,22 +750,7 @@ async function handleTwitchAuth() {
     const expectedState = sessionStorage.getItem("twitch_oauth_state");
 
     if (!expectedState || returnedState !== expectedState) {
-        console.warn("Invalid Twitch OAuth state. Ignoring stale callback.");
-
-        // Discard the invalid OAuth callback.
-        window.history.replaceState(
-            {},
-            document.title,
-            window.location.pathname + window.location.search
-        );
-
-        sessionStorage.removeItem("twitch_oauth_state");
-
-        // Restore the login button.
-        if (loginButton) {
-            loginButton.classList.remove("hidden");
-        }
-
+        console.error("❌ Invalid Twitch OAuth state.");
         return false;
     }
 
@@ -817,7 +866,7 @@ function setFollowedUserIds(ids) {
 }
 
 function updateTwitchProfile(user) {
-    if (profilePic && user.profile_image_url) {
+    if (profilePic && user?.profile_image_url) {
         profilePic.src = user.profile_image_url;
         profilePic.classList.remove("hidden");
     }
@@ -833,6 +882,21 @@ async function restoreTwitchLogin() {
     if (!accessToken) return;
 
     twitchAccessToken = accessToken;
+
+    // Display the saved profile immediately.
+    try {
+        const savedUser = JSON.parse(
+            localStorage.getItem("twitch_user") || "null"
+        );
+
+        if (savedUser) {
+            updateTwitchProfile(savedUser);
+        }
+    } catch (error) {
+        console.error("Failed to restore saved Twitch profile:", error);
+    }
+
+    // Refresh the profile from Twitch.
     await loadTwitchUser(accessToken);
 }
 
@@ -917,9 +981,35 @@ function setLoading(loading) {
 
 async function initializeApp() {
     const freshLogin = await handleTwitchAuth();
+
     if (!freshLogin) {
         await restoreTwitchLogin();
     }
+
+    if (!twitchAccessToken) {
+        if (loginRequired) {
+            loginRequired.classList.remove("hidden");
+        }
+
+        if (loadingLabel) {
+            loadingLabel.classList.add("hidden");
+        }
+
+        if (streamContent) {
+            streamContent.classList.add("hidden");
+        }
+
+        if (pagination) {
+            pagination.classList.add("hidden");
+        }
+
+        return;
+    }
+
+    if (loginRequired) {
+        loginRequired.classList.add("hidden");
+    }
+
     await loadStreams();
 }
 
