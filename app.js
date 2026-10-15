@@ -99,89 +99,39 @@ async function loadStreams() {
     try {
         setLoading(true);
 
-        const streams = [];
-        let cursor = null;
+        const response = await fetch(`https://zuljababot.onrender.com/twitch_music/streams?_=${Date.now()}`, {
+            cache: "no-store"
+        });
 
-        do {
-            const url = new URL(`${API_URL}/streams`);
-            url.searchParams.set("first", "100");
-            url.searchParams.set("game_id", "26936");
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
 
-            if (cursor) url.searchParams.set("after", cursor);
+        const result = await response.json();
 
-            const response = await fetch(url, {
-                headers: {
-                    "Client-ID": TWITCH_CLIENT_ID,
-                    ...(twitchAccessToken
-                        ? { Authorization: `Bearer ${twitchAccessToken}` }
-                        : {})
-                }
-            });
+        if (!Array.isArray(result.data)) {
+            console.error("❌ API data is not an array:", result.data);
+            throw new Error("Invalid API response: expected data array");
+        }
 
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}`);
-            }
-
-            const result = await response.json();
-            streams.push(...(result.data || []));
-            cursor = result.pagination?.cursor || null;
-        } while (cursor && streams.length < 500);
-
+        // Remove duplicate channels by Twitch user ID.
         const uniqueStreams = new Map();
 
-        for (const stream of streams) {
-            if (!stream.user_id || uniqueStreams.has(stream.user_id)) {
+        for (const stream of result.data) {
+            const userId = String(stream.user_id || "");
+
+            if (!userId || uniqueStreams.has(userId)) {
                 continue;
             }
 
-            uniqueStreams.set(stream.user_id, {
-                ...stream,
-                profileImageUrl: "",
-                description: "",
-                broadcasterType: "",
-                tags: stream.tags || []
-            });
+            uniqueStreams.set(userId, stream);
         }
 
         allStreams = Array.from(uniqueStreams.values());
 
-        // Load profile images, descriptions, and broadcaster types.
-        const headers = {
-            "Client-ID": TWITCH_CLIENT_ID,
-            ...(twitchAccessToken
-                ? { Authorization: `Bearer ${twitchAccessToken}` }
-                : {})
-        };
-
-        for (let i = 0; i < allStreams.length; i += 100) {
-            const batch = allStreams.slice(i, i + 100);
-            const url = new URL(`${API_URL}/users`);
-
-            batch.forEach(stream => {
-                url.searchParams.append("id", stream.user_id);
-            });
-
-            const response = await fetch(url, { headers });
-
-            if (!response.ok) continue;
-
-            const result = await response.json();
-            const users = new Map(
-                (result.data || []).map(user => [user.id, user])
-            );
-
-            batch.forEach(stream => {
-                const user = users.get(stream.user_id);
-                if (!user) return;
-
-                stream.profileImageUrl = user.profile_image_url || "";
-                stream.description = user.description || "";
-                stream.broadcasterType = user.broadcaster_type || "";
-            });
-        }
-
         currentPage = 0;
         render();
+
     } catch (error) {
         console.error("❌ Failed to load Music streams:", error);
 
@@ -197,7 +147,9 @@ async function loadStreams() {
             }
         }
 
-        if (pagination) pagination.classList.add("hidden");
+        if (pagination) {
+            pagination.classList.add("hidden");
+        }
     } finally {
         setLoading(false);
     }
@@ -734,7 +686,22 @@ async function handleTwitchAuth() {
     const expectedState = sessionStorage.getItem("twitch_oauth_state");
 
     if (!expectedState || returnedState !== expectedState) {
-        console.error("❌ Invalid Twitch OAuth state.");
+        console.warn("Invalid Twitch OAuth state. Ignoring stale callback.");
+
+        // Discard the invalid OAuth callback.
+        window.history.replaceState(
+            {},
+            document.title,
+            window.location.pathname + window.location.search
+        );
+
+        sessionStorage.removeItem("twitch_oauth_state");
+
+        // Restore the login button.
+        if (loginButton) {
+            loginButton.classList.remove("hidden");
+        }
+
         return false;
     }
 
@@ -912,10 +879,10 @@ async function refreshTwitchToken() {
             return null;
         }
 
-        localStorage.setItem("twitch_access_token",data.access_token);
+        localStorage.setItem("twitch_access_token", data.access_token);
 
         if (data.refresh_token) {
-            localStorage.setItem("twitch_refresh_token",data.refresh_token);
+            localStorage.setItem("twitch_refresh_token", data.refresh_token);
         }
 
         return data.access_token;
