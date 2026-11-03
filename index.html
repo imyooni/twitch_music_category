@@ -33,13 +33,13 @@
                     로그인
                 </button>
 
-                <div class="profile-menu-container">
-                    <button id="profileButton" class="profile-button">
+                <div class="profile-menu-container hidden" id="profileContainer">
+                    <button id="profileButton" class="profile-button" type="button">
                         <img id="profilePic" class="hidden" src="" alt="Profile">
                     </button>
 
                     <div id="profileDropdown" class="profile-dropdown hidden">
-                        <button id="logoutButton" class="logout-button">
+                        <button id="logoutButton" class="logout-button" type="button">
                             로그아웃
                         </button>
                     </div>
@@ -81,7 +81,7 @@
 
         <!-- Content -->
         <main id="content">
-  
+
 
             <div id="loadingLabel" class="loading-label">
                 <img src="./loading.gif" alt="">
