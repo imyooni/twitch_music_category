@@ -76,12 +76,14 @@ html::-webkit-scrollbar-thumb:hover {
     justify-content: space-between;
     width: 100%;
     padding: 8px 0 14px;
+    gap: 12px;
 }
 
 .music-info {
     display: flex;
     flex-direction: column;
     align-items: center;
+    min-width: 0;
 }
 
 .music-art {
@@ -125,10 +127,15 @@ html::-webkit-scrollbar-thumb:hover {
     text-decoration: underline;
 }
 
+/* FIX: header-right must be its own stacking context and never collapse,
+   so the login button stays tappable above the (now relative) profile menu. */
 .header-right {
     display: flex;
     align-items: center;
     gap: 10px;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 20;
 }
 
 
@@ -167,19 +174,37 @@ html::-webkit-scrollbar-thumb:hover {
     transform: scale(0.97);
 }
 
+/* FIX: real tap target, never shrinks, sits above profile container. */
 .login-button {
     padding: 9px 14px;
     font-size: 14px;
+    min-height: 44px;
+    min-width: 76px;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 2;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
 }
 
+/* FIX: was position: fixed covering the login button on mobile.
+   Now relative on mobile; only floats fixed on wide desktop. */
 .profile-menu-container {
-    position: fixed;
-    top: 20px;
-    right: max(20px, calc((100vw - 1100px) / 2 + 16px));
-    z-index: 101;
+    position: relative;
     display: inline-block;
+    flex-shrink: 0;
+    z-index: 101;
 }
 
+@media (min-width: 1101px) {
+    .profile-menu-container {
+        position: fixed;
+        top: 20px;
+        right: max(20px, calc((100vw - 1100px) / 2 + 16px));
+    }
+}
+
+/* FIX: fixed 56px box even when img is hidden, so it never collapses. */
 .profile-button {
     width: 56px;
     height: 56px;
@@ -188,6 +213,11 @@ html::-webkit-scrollbar-thumb:hover {
     background: none;
     cursor: pointer;
     border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .profile-button img {
@@ -198,7 +228,6 @@ html::-webkit-scrollbar-thumb:hover {
     border: 2px solid black;
     border-radius: 50%;
     object-fit: cover;
-    border-radius: 50%;
     display: block;
 }
 
@@ -249,6 +278,8 @@ html::-webkit-scrollbar-thumb:hover {
     pointer-events: none;
 }
 
+/* FIX: !important ensures the container (position:fixed/inline-block)
+   is truly removed when logged out. */
 .hidden {
     display: none !important;
 }
@@ -818,10 +849,17 @@ h2 {
         font-size: 10px;
     }
 
-    .profile-pic {
+    /* FIX: was `.profile-pic` which does not exist. */
+    .profile-button {
         width: 42px;
         height: 42px;
-        flex-basis: 42px;
+    }
+
+    /* FIX: mobile login button stays a full tap target. */
+    .login-button {
+        min-width: 68px;
+        padding: 0 12px;
+        font-size: 13px;
     }
 
     .stream-row {
