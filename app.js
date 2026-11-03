@@ -43,6 +43,7 @@ const profilePic = document.getElementById("profilePic");
 const profileButton = document.getElementById("profileButton");
 const profileDropdown = document.getElementById("profileDropdown");
 const logoutButton = document.getElementById("logoutButton");
+const profileContainer = document.getElementById("profileContainer");
 
 const loadingLabel = document.getElementById("loadingLabel");
 const streamContent = document.getElementById("streamContent");
@@ -720,6 +721,8 @@ function clearTwitchSession() {
         profilePic.removeAttribute("src");
     }
 
+    if (profileContainer) profileContainer.classList.add("hidden");
+
     if (loginButton) loginButton.classList.remove("hidden");
     if (loginRequired) {
         loginRequired.classList.remove("hidden");
@@ -873,6 +876,10 @@ function updateTwitchProfile(user) {
 
     if (loginButton) {
         loginButton.classList.add("hidden");
+    }
+
+    if (profileContainer) {
+        profileContainer.classList.remove("hidden");
     }
 }
 
